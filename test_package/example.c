@@ -1,3 +1,3 @@
-#include "GKlib/GKlib.h"
+#include "GKlib.h"
 
 int main() { }
