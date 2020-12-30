@@ -1,0 +1,54 @@
+name: CMake
+
+on: push
+
+env:
+  BUILD_TYPE: Release
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - ubuntu-latest
+          - windows-latest
+          - macos-latest
+        apps:
+          - 'True'
+          - 'False'
+        shared:
+          - 'True'
+          - 'False'
+        python-version:
+          - 3.x
+        exclude:
+          # When building shared library and apps on Windows, we acknowledge
+          # failure.
+          - os: windows-latest
+            apps: 'True'
+
+    runs-on: ${{matrix.os}}
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Set up Python ${{matrix.python-version}}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{matrix.python-version}}
+
+      - name: Download Conan package manager
+        run: |
+             python -m pip install --upgrade pip pip setuptools wheel
+             pip install conan
+
+      - name: Setup Conan package manager
+        run: |
+             conan --version
+             conan profile new default --detect --force
+             conan remote add jiverson002 https://api.bintray.com/conan/jiverson002/public-conan
+
+      - name: Build
+        shell: bash
+        run: conan create . jiverson002/unstable -o GKlib:shared=${{matrix.shared}} -o GKlib:apps=${{matrix.apps}}

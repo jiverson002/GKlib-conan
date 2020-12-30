@@ -13,23 +13,27 @@ class GKlibConan(ConanFile):
   options = {
     "shared": [True, False],
     "fPIC": [True, False],
-    "visibility": ["hidden", "default"]
+    "visibility": ["hidden", "default"],
+    "apps": [True, False]
   }
   default_options = {
     "shared": False,
     "fPIC": True,
-    "visibility": "default" # FIXME: hidden causes build to fail
+    "visibility": "default", # FIXME: hidden causes build to fail
+    "apps": True
   }
   exports = ["LICENSE"]
   scm = {
     "type": "git",
     "url": "https://github.com/jiverson002/GKlib.git",
-    "revision": "feature/modern-cmake"
+    "revision": "feature/modern-cmake-pr"
   }
 
   def build(self):
     cmake = CMake(self)
+    cmake.definitions["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
     cmake.definitions["CMAKE_C_VISIBILITY_PRESET"] = self.options.visibility
+    cmake.definitions["GKLIB_BUILD_APPS"] = self.options.apps
     #cmake.verbose = True
     cmake.configure()
     cmake.build()
